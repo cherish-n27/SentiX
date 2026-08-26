@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, sentixChatMessages, sentixWorkspaceReviews, sentixWorkspaces, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,61 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+export type StoredReview = { id: string; text: string; author?: string; source?: string; rating?: number | null; category: string; label: "Positive" | "Neutral" | "Negative"; compound: number; confidence: number; vaderCompound: number; transformerConfidence: number | null; transformerUsed: boolean; actionTag: string; timestamp: number };
+export type StoredChatMessage = { role: "user" | "assistant"; content: string; citations?: unknown; followUps?: unknown; createdAt: number };
+type RawWorkspaceReview = { clientReviewId: string; text: string; author: string | null; source: string | null; rating: number | null; category: string; label: "Positive" | "Neutral" | "Negative"; compound: string | number; confidence: number; vaderCompound: string | number; transformerConfidence: number | null; transformerUsed: boolean; actionTag: string; reviewedAt: Date };
+type RawWorkspaceMessage = { role: "user" | "assistant"; content: string; citations: unknown; followUps: unknown; createdAt: Date };
+
+export function buildPersistedReviewRows(workspaceId: number, reviews: StoredReview[]) {
+  return reviews.slice(0, 100).map(review => ({ workspaceId, clientReviewId: review.id, text: review.text, author: review.author, source: review.source, rating: review.rating ?? null, category: review.category, label: review.label, compound: String(review.compound), confidence: review.confidence, vaderCompound: String(review.vaderCompound), transformerConfidence: review.transformerConfidence, transformerUsed: review.transformerUsed, actionTag: review.actionTag, reviewedAt: new Date(review.timestamp) }));
+}
+
+export function hydrateWorkspaceState(reviews: RawWorkspaceReview[], messages: RawWorkspaceMessage[]) {
+  return { reviews: reviews.map(review => ({ id: review.clientReviewId, text: review.text, author: review.author ?? undefined, source: review.source ?? undefined, rating: review.rating, category: review.category, label: review.label, compound: Number(review.compound), confidence: review.confidence, vaderCompound: Number(review.vaderCompound), transformerConfidence: review.transformerConfidence, transformerUsed: review.transformerUsed, actionTag: review.actionTag, timestamp: review.reviewedAt.getTime() })), messages: messages.map(message => ({ role: message.role, content: message.content, citations: message.citations, followUps: message.followUps, createdAt: message.createdAt.getTime() })) };
+}
+
+async function ownedWorkspace(userId: number, workspaceId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Workspace storage is unavailable.");
+  const rows = await db.select().from(sentixWorkspaces).where(and(eq(sentixWorkspaces.id, workspaceId), eq(sentixWorkspaces.userId, userId))).limit(1);
+  if (!rows[0]) throw new Error("Workspace not found or access denied.");
+  return { db, workspace: rows[0] };
+}
+
+export async function listSentiXWorkspaces(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(sentixWorkspaces).where(eq(sentixWorkspaces.userId, userId)).orderBy(desc(sentixWorkspaces.updatedAt));
+}
+
+export async function createSentiXWorkspace(userId: number, name: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Workspace storage is unavailable.");
+  const result = await db.insert(sentixWorkspaces).values({ userId, name });
+  const id = Number(result[0].insertId);
+  const rows = await db.select().from(sentixWorkspaces).where(eq(sentixWorkspaces.id, id)).limit(1);
+  return rows[0]!;
+}
+
+export async function loadSentiXWorkspace(userId: number, workspaceId: number) {
+  const { db, workspace } = await ownedWorkspace(userId, workspaceId);
+  const [reviews, messages] = await Promise.all([
+    db.select().from(sentixWorkspaceReviews).where(eq(sentixWorkspaceReviews.workspaceId, workspaceId)).orderBy(desc(sentixWorkspaceReviews.id)),
+    db.select().from(sentixChatMessages).where(eq(sentixChatMessages.workspaceId, workspaceId)).orderBy(sentixChatMessages.id),
+  ]);
+  return { workspace, ...hydrateWorkspaceState(reviews, messages) };
+}
+
+export async function replaceSentiXWorkspaceReviews(userId: number, workspaceId: number, reviews: StoredReview[]) {
+  const { db } = await ownedWorkspace(userId, workspaceId);
+  await db.delete(sentixWorkspaceReviews).where(eq(sentixWorkspaceReviews.workspaceId, workspaceId));
+  const rows = buildPersistedReviewRows(workspaceId, reviews);
+  if (rows.length) await db.insert(sentixWorkspaceReviews).values(rows);
+  await db.update(sentixWorkspaces).set({ updatedAt: new Date() }).where(eq(sentixWorkspaces.id, workspaceId));
+}
+
+export async function addSentiXChatMessage(userId: number, workspaceId: number, message: Omit<StoredChatMessage, "createdAt">) {
+  const { db } = await ownedWorkspace(userId, workspaceId);
+  await db.insert(sentixChatMessages).values({ workspaceId, role: message.role, content: message.content, citations: message.citations, followUps: message.followUps });
+  await db.update(sentixWorkspaces).set({ updatedAt: new Date() }).where(eq(sentixWorkspaces.id, workspaceId));
+}

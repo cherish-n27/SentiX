@@ -8,6 +8,13 @@
       "when": 1787738079100,
       "tag": "0000_smiling_sentry",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1787750968663,
+      "tag": "0001_wonderful_blazing_skull",
+      "breakpoints": true
     }
   ]
 }

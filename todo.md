@@ -12,3 +12,24 @@
 - [x] Document SentiX’s session-only review data lifecycle and typed analysis contract.
 - [x] Add automated tests for enriched CSV escaping, column order, and executive report content formatting.
 - [x] Fix the SentiX tRPC dashboard query that returns an HTML page instead of JSON in preview mode.
+- [x] Define persisted workspace, review, and prompt-history data models with secure user ownership.
+- [x] Support legible PDF, DOC, DOCX, XLS, XLSX, TXT, PNG/JPG, CSV, and JSON imports with extraction safeguards.
+- [x] Build saved workspace controls that restore analyzed data and prompt history.
+- [x] Add a data-aware SentiX chatbot with grounded answers, follow-up prompts, and cited review references.
+- [x] Build the animated tri-fold chat canvas with fixed sidebar, top-positioned Close Chat control, and 380 px analytics rail.
+- [x] Enable citation clicks to close chat and apply the cited review and aspect filters in the dashboard.
+- [x] Add automated tests for document parsing, workspace persistence, data-chat citations, and navigation behavior.
+- [x] Validate the complete feature set at desktop and tablet breakpoints.
+- [x] Keep an equivalent persistent analytics rail visible in the chat canvas at tablet presentation widths.
+- [x] Add parser-route tests for PDF, DOCX, DOC, and image OCR flows, and stronger workspace load/prompt-history persistence coverage.
+- [x] Validate the opened chat canvas, citation filtering, workspace restoration, and supported import routes at desktop and tablet widths.
+- [x] Add mocked extraction-handler tests for PDF, DOCX, legacy DOC, and image OCR import execution.
+- [x] Add integration-level persistence coverage for saving and reopening workspace reviews and prompt history.
+- [x] Document representative desktop and tablet interaction validation for chat citations, workspace restoration, and PDF/XLSX/PNG imports.
+- [x] Add an end-to-end repository-style test covering saved reviews and prompt history reopened from the same workspace.
+- [x] Add explicit interaction-validation coverage for chat citation filtering, workspace restoration, and representative PDF/XLSX/PNG import flows.
+- [x] Add real repository-layer persistence-cycle coverage without mocking the workspace storage module.
+- [x] Add browser or component-level interaction coverage for citation clicks, workspace restore, and representative document imports.
+- [x] Add rendered dashboard coverage for restoring a selected workspace and its prompt history.
+- [x] Add rendered Dataset Import coverage for representative PDF, XLSX, and PNG file selections and progress or handoff behavior.
+- [x] Add rendered dashboard/chat coverage showing restored prompt history after workspace selection.
