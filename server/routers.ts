@@ -30,7 +30,7 @@ export const appRouter = router({
       .mutation(async ({ input }) => analyzeReviews(await searchReviews(input.keyword))),
     insights: publicProcedure
       .input(z.object({ reviews: z.array(z.any()).max(100) }))
-      .query(({ input }) => buildInsights(input.reviews)),
+      .mutation(({ input }) => buildInsights(input.reviews)),
   }),
 });
 

@@ -11,3 +11,4 @@
 - [x] Verify desktop and tablet layouts, assess UI quality, and resolve visual or runtime issues.
 - [x] Document SentiX’s session-only review data lifecycle and typed analysis contract.
 - [x] Add automated tests for enriched CSV escaping, column order, and executive report content formatting.
+- [x] Fix the SentiX tRPC dashboard query that returns an HTML page instead of JSON in preview mode.

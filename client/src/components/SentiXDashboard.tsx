@@ -7,7 +7,7 @@ import { buildEnrichedCsv, buildExecutiveReportSections } from "@/lib/exports";
 import { trpc } from "@/lib/trpc";
 import { jsPDF } from "jspdf";
 import { Activity, ArrowDownToLine, BarChart3, CheckCircle2, CloudUpload, FileText, HelpCircle, Inbox, Loader2, Search, ShieldCheck, SlidersHorizontal, Sparkles, Target, Upload, WandSparkles } from "lucide-react";
-import { useMemo, useRef, useState, type ComponentType } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 
@@ -66,8 +66,12 @@ export default function SentiXDashboard() {
   const batch = trpc.sentiment.analyzeBatch.useMutation();
   const text = trpc.sentiment.analyzeText.useMutation();
   const search = trpc.sentiment.liveSearch.useMutation();
-  const insights = trpc.sentiment.insights.useQuery({ reviews }, { enabled: reviews.length > 0 });
+  const insights = trpc.sentiment.insights.useMutation();
   const loading = batch.isPending || text.isPending || search.isPending;
+
+  useEffect(() => {
+    if (reviews.length > 0) insights.mutate({ reviews });
+  }, [reviews]);
 
   const addReviews = (incoming: Review[]) => { setReviews(current => [...incoming, ...current]); toast.success(`${incoming.length} review${incoming.length === 1 ? "" : "s"} analyzed.`); };
   const analyzeMany = async (items: ReviewDraft[]) => { if (!items.length) return toast.error("No review text was found."); try { addReviews(await batch.mutateAsync({ reviews: items.slice(0, 100) })); } catch (error) { toast.error(error instanceof Error ? error.message : "Analysis could not be completed."); } };
