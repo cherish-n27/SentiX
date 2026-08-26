@@ -2,6 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { extractLegacyWordText } from "./documentExtraction";
+import { answerDataQuestion } from "./dataChat";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { analyzeReviews, buildInsights, searchReviews } from "./sentiment";
@@ -35,6 +36,13 @@ export const appRouter = router({
     insights: publicProcedure
       .input(z.object({ reviews: z.array(z.any()).max(100) }))
       .mutation(({ input }) => buildInsights(input.reviews)),
+    chat: publicProcedure
+      .input(z.object({
+        question: z.string().min(2).max(1000),
+        history: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(1200) })).max(8).optional(),
+        reviews: z.array(z.object({ id: z.string(), text: z.string().max(5000), author: z.string().optional(), source: z.string().optional(), rating: z.number().nullable().optional(), category: z.string(), label: z.enum(["Positive", "Neutral", "Negative"]), compound: z.number(), confidence: z.number(), vaderCompound: z.number(), transformerConfidence: z.number().nullable(), transformerUsed: z.boolean(), actionTag: z.string(), timestamp: z.number() })).max(100),
+      }))
+      .mutation(({ input }) => answerDataQuestion(input.question, input.reviews, input.history)),
   }),
 });
 

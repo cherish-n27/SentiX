@@ -16,3 +16,9 @@
 - [x] Add import-format validation and automated tests for document text extraction safeguards.
 - [x] Add import-safeguard tests for unsupported files, oversized files, and unreadable extracted text.
 - [x] Add parser-route tests for TXT and CSV imports plus mocked PDF, DOCX, DOC, and image extraction flows.
+- [x] Add a data-aware SentiX chatbot that answers questions about active reviews and insights with cited review references.
+- [x] Build the animated tri-fold chat canvas with fixed sidebar, central workspace, and 380 px analytics rail.
+- [x] Enable inline citation badges to close chat and filter the dashboard review table to the cited evidence.
+- [x] Add automated tests for data-aware chat answers, citations, and dashboard navigation behavior.
+- [x] Apply the citation aspect as an active dashboard review filter when a chat citation is selected.
+- [x] Add a tested citation-navigation state resolver covering chat close, dashboard selection, review targeting, and aspect filtering.
