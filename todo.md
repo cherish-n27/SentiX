@@ -12,7 +12,3 @@
 - [x] Document SentiX’s session-only review data lifecycle and typed analysis contract.
 - [x] Add automated tests for enriched CSV escaping, column order, and executive report content formatting.
 - [x] Fix the SentiX tRPC dashboard query that returns an HTML page instead of JSON in preview mode.
-- [x] Support legible PDF, Word, TXT, PNG, CSV, and JSON files in Dataset Import with feedback-text extraction.
-- [x] Add import-format validation and automated tests for document text extraction safeguards.
-- [x] Add import-safeguard tests for unsupported files, oversized files, and unreadable extracted text.
-- [x] Add parser-route tests for TXT and CSV imports plus mocked PDF, DOCX, DOC, and image extraction flows.
