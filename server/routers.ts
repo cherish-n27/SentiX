@@ -1,6 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { extractLegacyWordText } from "./documentExtraction";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { analyzeReviews, buildInsights, searchReviews } from "./sentiment";
@@ -28,6 +29,9 @@ export const appRouter = router({
     liveSearch: publicProcedure
       .input(z.object({ keyword: z.string().min(3).max(180) }))
       .mutation(async ({ input }) => analyzeReviews(await searchReviews(input.keyword))),
+    extractLegacyWord: publicProcedure
+      .input(z.object({ fileName: z.string().regex(/\.doc$/i, "A .doc file is required."), contentBase64: z.string().min(1).max(12_000_000) }))
+      .mutation(({ input }) => extractLegacyWordText(input.fileName, input.contentBase64)),
     insights: publicProcedure
       .input(z.object({ reviews: z.array(z.any()).max(100) }))
       .mutation(({ input }) => buildInsights(input.reviews)),
