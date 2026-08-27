@@ -33,3 +33,9 @@
 - [x] Add rendered dashboard coverage for restoring a selected workspace and its prompt history.
 - [x] Add rendered Dataset Import coverage for representative PDF, XLSX, and PNG file selections and progress or handoff behavior.
 - [x] Add rendered dashboard/chat coverage showing restored prompt history after workspace selection.
+- [x] Fix the missing NLTK Python dependency that prevents VADER sentiment analysis in the active SentiX runtime.
+- [x] Add startup validation and regression coverage for the VADER Python runtime dependency.
+- [x] Add startup health validation that reports Python VADER availability or fallback mode before sentiment requests are processed.
+- [x] Add regression coverage for the VADER runtime health-check result and fallback-mode reporting.
+- [x] Complete VADER runtime health detection before the SentiX server begins accepting requests.
+- [x] Add behavioral tests for healthy and fallback VADER startup-health outcomes.

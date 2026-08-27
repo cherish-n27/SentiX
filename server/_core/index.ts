@@ -6,6 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
+import { checkVaderRuntime, formatVaderRuntimeHealth } from "../sentiment";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 
@@ -58,6 +59,8 @@ async function startServer() {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
+  const vaderHealth = await checkVaderRuntime();
+  console.log(formatVaderRuntimeHealth(vaderHealth));
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
   });
