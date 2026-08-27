@@ -60,3 +60,8 @@
 - [x] Add the requested pulsing Takealot-blue assistant-entry treatment while preserving accessible reduced-motion behavior.
 - [x] Remove Python runtime dependence so sentiment processing and deployment run entirely in TypeScript and JavaScript.
 - [x] Add regression coverage for workbench behavior, quick-analysis isolation, engine transparency, and JavaScript-only sentiment scoring.
+- [x] Position the Ask SentiX AI entry as a static bottom-right control.
+- [x] Remove the redundant Data chat navbar action in source code and add a regression assertion that it is absent from the header.
+- [x] Improve tri-fold chat scrolling so the message feed, workbench list, and review references scroll independently without hidden content or nested-scroll friction.
+- [x] Refine tri-fold chat controls and responsive layout for clearer, less repetitive assistant UX.
+- [x] Add regression coverage and desktop/tablet visual verification for the assistant-entry and tri-fold UX refinements.

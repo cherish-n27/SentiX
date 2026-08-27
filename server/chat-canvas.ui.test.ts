@@ -15,6 +15,9 @@ describe("SentiX chat canvas UI", () => {
   it("invokes citation navigation, embedded workbench controls, and the center-panel Close Chat action", async () => {
     const user = userEvent.setup(); const onCitation = vi.fn(); const onClose = vi.fn(); const onExportTranscript = vi.fn(); const onClearHistory = vi.fn(); const onSelectWorkbench = vi.fn(); const onCreateWorkbench = vi.fn(); const onQuickAnalysis = vi.fn();
     render(createElement(SentiXChatCanvas, { open: true, onClose, workspaceName: "Review workbench", workspaceId: 5, reviews: [review], history: [{ role: "assistant", content: "Refunds need attention.", citations: [{ code: "TK-101", reviewId: "rv-1", aspect: "Refunds", source: "reviews.xlsx", sentiment: "Negative" }] }], onHistoryChange: vi.fn(), onAsk: vi.fn(), asking: false, onCitation, onOpenWorkspace: vi.fn(), workbenches: [{ id: 5, name: "Review workbench", updatedAt: new Date("2026-08-27") }, { id: 7, name: "Delivery issues", updatedAt: new Date("2026-08-26") }], onSelectWorkbench, onCreateWorkbench, onQuickAnalysis, onExportTranscript, onClearHistory }));
+    expect(screen.getByLabelText("Conversation history").className).toContain("overscroll-contain");
+    expect(screen.getByLabelText("Recent workbenches").className).toContain("overflow-y-auto");
+    expect(screen.getByLabelText("Workbench evidence").className).toContain("overscroll-contain");
     await user.click(screen.getByRole("button", { name: "[TK-101]" }));
     expect(onCitation).toHaveBeenCalledWith("rv-1");
     await user.click(screen.getByRole("button", { name: /transcript/i }));

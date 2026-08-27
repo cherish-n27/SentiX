@@ -44,8 +44,10 @@ afterEach(() => cleanup());
 
 describe("SentiX dashboard rendered interactions", () => {
   it("automatically saves a workbench and opens Data chat when no saved session exists", async () => {
-    const user = userEvent.setup(); render(createElement(SentiXDashboard));
-    await user.click(screen.getByRole("button", { name: /^data chat$/i }));
+    const user = userEvent.setup(); const view = render(createElement(SentiXDashboard));
+    expect(screen.getByRole("button", { name: /ask sentix ai/i }).className).toContain("fixed bottom-6 right-6");
+    expect(within(view.container.querySelector("header")!).queryByRole("button", { name: /^data chat$/i })).toBeNull();
+    await user.click(screen.getByRole("button", { name: /ask sentix ai/i }));
     await waitFor(() => expect(mocks.create).toHaveBeenCalledWith({ seed: "Customer feedback analysis", reviewSnippets: [] }));
     expect(await screen.findByText("Data Insights Assistant")).toBeTruthy();
     expect(screen.getAllByText("Customer feedback workbench").length).toBeGreaterThan(0);
@@ -57,7 +59,7 @@ describe("SentiX dashboard rendered interactions", () => {
     await waitFor(() => expect(mocks.load).toHaveBeenCalledWith({ workspaceId: 5 }));
     expect(screen.getAllByText("Refund workbench").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Refund processing took too long.").length).toBeGreaterThan(0);
-    await user.click(screen.getAllByRole("button", { name: /data chat/i })[0]!);
+    await user.click(screen.getByRole("button", { name: /ask sentix ai/i }));
     expect(await screen.findByText("Refunds require attention.")).toBeTruthy();
   });
 
