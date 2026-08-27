@@ -47,6 +47,7 @@ export const sentixWorkspaceReviews = mysqlTable("sentixWorkspaceReviews", {
   compound: decimal("compound", { precision: 5, scale: 3 }).notNull(),
   confidence: int("confidence").notNull(),
   vaderCompound: decimal("vaderCompound", { precision: 5, scale: 3 }).notNull(),
+  transformerLabel: varchar("transformerLabel", { length: 20 }),
   transformerConfidence: int("transformerConfidence"),
   transformerUsed: boolean("transformerUsed").notNull().default(false),
   actionTag: varchar("actionTag", { length: 255 }).notNull(),
@@ -64,8 +65,17 @@ export const sentixChatMessages = mysqlTable("sentixChatMessages", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, table => [index("sentix_chat_workspace_idx").on(table.workspaceId)]);
 
+export const sentixQuickAnalyses = mysqlTable("sentixQuickAnalyses", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  text: text("text").notNull(),
+  analysis: json("analysis").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, table => [index("sentix_quick_analysis_user_idx").on(table.userId)]);
+
 export type SentiXWorkspace = typeof sentixWorkspaces.$inferSelect;
 export type InsertSentiXWorkspace = typeof sentixWorkspaces.$inferInsert;
 export type SentiXWorkspaceReview = typeof sentixWorkspaceReviews.$inferSelect;
 export type InsertSentiXWorkspaceReview = typeof sentixWorkspaceReviews.$inferInsert;
 export type SentiXChatMessage = typeof sentixChatMessages.$inferSelect;
+export type SentiXQuickAnalysis = typeof sentixQuickAnalyses.$inferSelect;

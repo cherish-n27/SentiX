@@ -1,0 +1,1 @@
+ALTER TABLE `sentixWorkspaceReviews` ADD `transformerLabel` varchar(20);

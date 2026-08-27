@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fallbackChat, selectCitations } from "./dataChat";
+import { answerProductQuestion, fallbackChat, selectCitations } from "./dataChat";
 
 const reviews = [
   { id: "rv-1", text: "Fast delivery and helpful support.", source: "file.csv", category: "Delivery", label: "Positive" as const, compound: 0.72, confidence: 91, vaderCompound: 0.7, transformerConfidence: null, transformerUsed: false, actionTag: "Protect delivery strength", timestamp: 1 },
@@ -15,5 +15,10 @@ describe("SentiX data chat", () => {
     expect(reply.answer).toContain("2 analyzed reviews");
     expect(reply.citations).toHaveLength(2);
     expect(reply.followUps).toContain("What is driving negative sentiment?");
+  });
+  it("explains documented application metrics without manufacturing review citations", () => {
+    const reply = answerProductQuestion("What is Sentiment Health Score and how does Engine Breakdown work?");
+    expect(reply?.answer).toContain("Net Sentiment Score");
+    expect(reply?.citations).toEqual([]);
   });
 });

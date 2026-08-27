@@ -1,4 +1,3 @@
-import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 
 export type SentimentLabel = "Positive" | "Neutral" | "Negative";
@@ -21,6 +20,7 @@ export type AnalyzedReview = ReviewInput & {
   confidence: number;
   category: string;
   vaderCompound: number;
+  transformerLabel?: SentimentLabel | null;
   transformerConfidence: number | null;
   transformerUsed: boolean;
   actionTag: string;
@@ -40,6 +40,7 @@ const vaderSentiment = require("vader-sentiment") as { SentimentIntensityAnalyze
 type TransformerSignal = {
   polarity: number;
   confidence: number;
+  label: SentimentLabel;
 };
 
 const MODEL_ID = "cardiffnlp/twitter-roberta-base-sentiment-latest";
@@ -85,55 +86,24 @@ export function fallbackVaderScores(texts: string[]): VaderScore[] {
   return texts.map(text => vaderSentiment.SentimentIntensityAnalyzer.polarity_scores(text));
 }
 
-export type VaderRuntimeHealth = { mode: "python-nltk-vader" | "javascript-vader-fallback"; detail: string };
+export type VaderRuntimeHealth = { mode: "javascript-vader"; detail: string };
 
 export function formatVaderRuntimeHealth(health: VaderRuntimeHealth) {
   return `[Sentiment] VADER runtime: ${health.mode} — ${health.detail}`;
 }
 
-export function resolveVaderRuntimeHealth(code: number | null, stderr: string): VaderRuntimeHealth {
-  return code === 0
-    ? { mode: "python-nltk-vader", detail: "NLTK and the VADER lexicon are ready." }
-    : { mode: "javascript-vader-fallback", detail: `Python VADER unavailable (${stderr.trim().split("\n").at(-1) || "unknown error"}); fallback scoring is enabled.` };
-}
-
-export function checkVaderRuntime({ spawnProcess = spawn, timeoutMs = 5_000 }: { spawnProcess?: typeof spawn; timeoutMs?: number } = {}): Promise<VaderRuntimeHealth> {
-  return new Promise(resolve => {
-    const child = spawnProcess("python3", ["scripts/vader_sentiment.py", "--health"], { cwd: process.cwd(), env: { ...process.env, NLTK_DATA: process.env.NLTK_DATA || "/usr/local/nltk_data" } });
-    let stderr = "";
-    const timer = setTimeout(() => { child.kill(); resolve({ mode: "javascript-vader-fallback", detail: "Python VADER health check timed out; fallback scoring is enabled." }); }, timeoutMs);
-    child.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
-    child.on("error", () => { clearTimeout(timer); resolve({ mode: "javascript-vader-fallback", detail: "Python VADER is unavailable; fallback scoring is enabled." }); });
-    child.on("close", (code: number | null) => { clearTimeout(timer); resolve(resolveVaderRuntimeHealth(code, stderr)); });
-  });
+export function checkVaderRuntime(): Promise<VaderRuntimeHealth> {
+  try {
+    const probe = fallbackVaderScores(["SentiX VADER readiness check."])[0];
+    if (!probe || !Number.isFinite(probe.compound)) throw new Error("The JavaScript VADER engine returned an invalid score.");
+    return Promise.resolve({ mode: "javascript-vader", detail: "The bundled JavaScript VADER engine is ready; no Python runtime is required." });
+  } catch (error) {
+    return Promise.reject(error instanceof Error ? error : new Error("The JavaScript VADER engine is unavailable."));
+  }
 }
 
 function runVader(texts: string[]): Promise<VaderScore[]> {
-  return new Promise((resolve, reject) => {
-    const child = spawn("python3", ["scripts/vader_sentiment.py"], { cwd: process.cwd(), env: { ...process.env, NLTK_DATA: process.env.NLTK_DATA || "/usr/local/nltk_data" } });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
-    child.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
-    child.on("error", reject);
-    child.on("close", (code: number | null) => {
-      if (code !== 0) {
-        if (/No module named ['\"]nltk['\"]|vader_lexicon[\s\S]*not found|Resource[\s\S]*vader_lexicon/.test(stderr)) {
-          resolve(fallbackVaderScores(texts));
-          return;
-        }
-        reject(new Error(`VADER analysis did not complete: ${stderr || "unknown Python error"}`));
-        return;
-      }
-      try {
-        resolve(JSON.parse(stdout) as VaderScore[]);
-      } catch {
-        reject(new Error("VADER analysis returned an unreadable result."));
-      }
-    });
-    child.stdin.write(JSON.stringify({ texts }));
-    child.stdin.end();
-  });
+  return Promise.resolve(fallbackVaderScores(texts));
 }
 
 async function getTransformerSignal(text: string): Promise<TransformerSignal | null> {
@@ -158,7 +128,8 @@ async function getTransformerSignal(text: string): Promise<TransformerSignal | n
     const neutral = getScore("neutral");
     const confidence = Math.max(positive, negative, neutral);
     if (!confidence) return null;
-    return { polarity: clamp(positive - negative), confidence };
+    const label = positive >= negative && positive >= neutral ? "Positive" : negative >= neutral ? "Negative" : "Neutral";
+    return { polarity: clamp(positive - negative), confidence, label };
   } catch {
     return null;
   }
@@ -198,6 +169,7 @@ export async function analyzeReviews(inputs: ReviewInput[]): Promise<AnalyzedRev
       confidence,
       category,
       vaderCompound: Number(vader.compound.toFixed(3)),
+      transformerLabel: transformer?.label ?? null,
       transformerConfidence: transformer ? Math.round(transformer.confidence * 100) : null,
       transformerUsed: Boolean(transformer),
       actionTag: deriveActionTag(label, category),

@@ -50,3 +50,13 @@
 - [x] Add post-ingest record-count validation and regression tests that detect unintended review fragmentation.
 - [x] Automatically create and persist a workspace for an authenticated active analysis before allowing data-chat access.
 - [x] Add regression coverage that confirms automatic workspace creation, review persistence, and data-chat readiness.
+- [x] Replace manual workspace concepts with auto-saved workbenches that can be named, renamed, created, and selected from a concise history list.
+- [x] Generate short descriptive workbench names from the opening dataset or prompt without exposing AI credentials.
+- [x] Persist personal quick analyses separately from business workbench reviews and expose a revisitable history list.
+- [x] Add customer-volume trend analytics.
+- [x] Show per-review VADER raw polarity alongside Hugging Face refined sentiment/confidence, derived aspect, and final classification in the Engine Breakdown panel.
+- [x] Make the assistant answer both review-data questions and plain-language KPI, chart, and report definitions.
+- [x] Add embedded workbench switching and quick-analysis entry points to the assistant and control-center navigation.
+- [x] Add the requested pulsing Takealot-blue assistant-entry treatment while preserving accessible reduced-motion behavior.
+- [x] Remove Python runtime dependence so sentiment processing and deployment run entirely in TypeScript and JavaScript.
+- [x] Add regression coverage for workbench behavior, quick-analysis isolation, engine transparency, and JavaScript-only sentiment scoring.
