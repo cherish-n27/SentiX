@@ -16,7 +16,7 @@ export type SavedPrompt = {
   followUps?: string[]; createdAt?: number;
 };
 
-const tone = { Positive: "text-emerald-300", Neutral: "text-amber-300", Negative: "text-rose-300" };
+const tone = { Positive: "text-[#09BF5A]", Neutral: "text-[#8B93A3]", Negative: "text-[#D82528]" };
 type WorkbenchSummary = { id: number; name: string; updatedAt: Date | string };
 type Props = {
   open: boolean; onClose: () => void; workspaceName: string; workspaceId: number | null; reviews: ChatReview[];

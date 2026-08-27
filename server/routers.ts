@@ -27,6 +27,9 @@ export const appRouter = router({
     analyzeText: publicProcedure
       .input(z.object({ id: z.string().max(100).optional(), date: z.string().max(100).optional(), text: z.string().min(2).max(5000), author: z.string().optional(), source: z.string().optional(), rating: z.number().nullable().optional(), category: z.string().optional(), timestamp: z.number().optional() }))
       .mutation(({ input }) => analyzeReviews([input]).then(results => results[0])),
+    guestQuickAnalysis: publicProcedure
+      .input(z.object({ text: z.string().min(2).max(5_000) }))
+      .mutation(async ({ input }) => (await analyzeReviews([{ text: input.text, source: "Guest quick analysis", category: "Guest trial" }]))[0]),
     analyzeBatch: publicProcedure
       .input(z.object({ reviews: z.array(z.object({ id: z.string().max(100).optional(), date: z.string().max(100).optional(), text: z.string().min(1).max(5000), author: z.string().optional(), source: z.string().optional(), rating: z.number().nullable().optional(), category: z.string().optional(), timestamp: z.number().optional() })).min(1).max(100) }))
       .mutation(({ input }) => analyzeReviews(input.reviews)),

@@ -97,6 +97,8 @@ describe("SentiX dashboard rendered interactions", () => {
     await user.keyboard("{Enter}");
     await waitFor(() => expect(mocks.quickRun).toHaveBeenCalledWith({ texts: ["Private feedback"] }));
     expect(await screen.findByText(/private result · negative/i)).toBeTruthy();
+    expect(screen.getByLabelText("Private quick analysis result").querySelector('[data-sentiment="negative"]')?.className).toContain("bg-[#D82528]/10");
+    expect(screen.getByLabelText("Private quick analysis result").querySelector('[data-urgency="high-urgency"]')?.className).toContain("bg-[#F8C72D]/10");
     expect(mocks.saveReviews).not.toHaveBeenCalled();
   });
 });

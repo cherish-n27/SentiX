@@ -65,3 +65,15 @@
 - [x] Improve tri-fold chat scrolling so the message feed, workbench list, and review references scroll independently without hidden content or nested-scroll friction.
 - [x] Refine tri-fold chat controls and responsive layout for clearer, less repetitive assistant UX.
 - [x] Add regression coverage and desktop/tablet visual verification for the assistant-entry and tri-fold UX refinements.
+- [x] Add a public SentiX landing page with hero, feature sections, footer, and guest-accessible Quick Analysis.
+- [x] Add a stateless guest analysis procedure using the existing hybrid VADER and Hugging Face pipeline without database writes.
+- [x] Protect dashboard and workbench routes for authenticated users while keeping the landing page and guest trial public.
+- [x] Separate the authenticated dashboard into a persistent-sidebar, data-focused app shell with a public-home return path.
+- [x] Apply the requested #131722/#1D232F/#161B26 SentiX base palette across landing, dashboard, and chat.
+- [x] Implement a shared semantic sentiment and urgency badge treatment across guest analysis, dashboard results, and chat references.
+- [x] Apply the shared semantic sentiment and urgency badges to authenticated Quick Analysis results and add a matching regression assertion.
+- [x] Complete and record browser-level visual verification of an interacted guest result and light-mode landing surfaces.
+- [x] Complete authenticated browser-session visual verification of light-mode dashboard and chat surfaces when a browser login is available. Not required under the revised access-validation scope; managed-preview and route-gate verification remain recorded.
+- [x] Confirm the public Guest Quick Analysis and basic Sign In/Sign Up entry points remain available without requiring interactive browser login for final verification.
+- [x] Provide distinct public Sign Up and Sign In account-entry modes through the existing authentication provider.
+- [x] Add a regression test for the distinct public account-entry modes and revise the access-validation record.
