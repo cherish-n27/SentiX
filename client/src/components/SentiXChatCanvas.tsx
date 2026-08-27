@@ -5,7 +5,7 @@ import { Streamdown } from "streamdown";
 import { BarChart3, Bot, Database, Download, FileSearch, Loader2, MessageSquareText, Send, Sparkles, Trash2, X } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-export type ChatReview = { id: string; text: string; author?: string; source?: string; rating?: number | null; category: string; label: "Positive" | "Neutral" | "Negative"; compound: number; confidence: number; vaderCompound: number; transformerConfidence: number | null; transformerUsed: boolean; actionTag: string; timestamp: number };
+export type ChatReview = { id: string; date?: string; text: string; author?: string; source?: string; rating?: number | null; category: string; label: "Positive" | "Neutral" | "Negative"; compound: number; confidence: number; vaderCompound: number; transformerConfidence: number | null; transformerUsed: boolean; actionTag: string; timestamp: number };
 export type SavedPrompt = { role: "user" | "assistant"; content: string; citations?: Array<{ code: string; reviewId: string; aspect: string; source: string; sentiment: "Positive" | "Neutral" | "Negative" }>; followUps?: string[]; createdAt?: number };
 
 const tone = { Positive: "text-emerald-300", Neutral: "text-amber-300", Negative: "text-rose-300" };

@@ -15,6 +15,13 @@
       "when": 1787750968663,
       "tag": "0001_wonderful_blazing_skull",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1787830238942,
+      "tag": "0002_mighty_mordo",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,8 @@ import { createRequire } from "node:module";
 export type SentimentLabel = "Positive" | "Neutral" | "Negative";
 
 export type ReviewInput = {
+  id?: string;
+  date?: string;
   text: string;
   author?: string;
   source?: string;
@@ -172,6 +174,7 @@ export async function analyzeReviews(inputs: ReviewInput[]): Promise<AnalyzedRev
   const vaderScores = await runVader(normalized.map(item => item.text));
   const transformerSignals = await Promise.all(normalized.map(item => getTransformerSignal(item.text)));
 
+  const assignedIds = new Set<string>();
   return normalized.map((item, index) => {
     const vader = vaderScores[index];
     const transformer = transformerSignals[index];
@@ -184,9 +187,12 @@ export async function analyzeReviews(inputs: ReviewInput[]): Promise<AnalyzedRev
     const confidence = Math.round((transformer ? vaderConfidence * 0.42 + transformer.confidence * 0.58 : vaderConfidence) * 100);
     const category = item.category || local.category;
 
+    const preferredId = item.id?.trim() || `review-${Date.now()}-${index + 1}`;
+    const id = assignedIds.has(preferredId) ? `${preferredId}-${index + 1}` : preferredId;
+    assignedIds.add(id);
     return {
       ...item,
-      id: `${index}-${Date.now()}`,
+      id,
       label,
       compound: Number(compound.toFixed(3)),
       confidence,

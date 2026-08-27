@@ -44,3 +44,7 @@
 - [x] Complete Data Insights Assistant tools, including follow-up prompts, chat actions, history controls, citations, and reference-feed interactions.
 - [x] Add regression tests for completed report export and Data Insights Assistant action flows.
 - [x] Make the Data Insights Assistant sidebar destinations functional for returning to the message feed, prompt history, and workspace signal rail.
+- [x] Preserve one atomic review per CSV row or document-derived record throughout SentiX ingestion and sentiment analysis.
+- [x] Map review IDs, dates, sources, and review text into separate structured fields before any NLP processing.
+- [x] Add AI-assisted structured review-boundary extraction for non-tabular document text without comma or period splitting.
+- [x] Add post-ingest record-count validation and regression tests that detect unintended review fragmentation.

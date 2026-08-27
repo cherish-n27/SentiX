@@ -37,6 +37,7 @@ export const sentixWorkspaceReviews = mysqlTable("sentixWorkspaceReviews", {
   id: int("id").autoincrement().primaryKey(),
   workspaceId: int("workspaceId").notNull(),
   clientReviewId: varchar("clientReviewId", { length: 100 }).notNull(),
+  reviewDate: varchar("reviewDate", { length: 100 }),
   text: text("text").notNull(),
   author: varchar("author", { length: 255 }),
   source: varchar("source", { length: 255 }),

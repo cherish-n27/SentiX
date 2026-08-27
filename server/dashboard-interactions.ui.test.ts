@@ -5,7 +5,7 @@ import { createElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  load: vi.fn(), extract: vi.fn(), analyzeBatch: vi.fn(), saveReviews: vi.fn(), clearHistory: vi.fn(), insights: vi.fn(), download: vi.fn(), pdfSave: vi.fn(),
+  load: vi.fn(), extract: vi.fn(), documentReviews: vi.fn(), analyzeBatch: vi.fn(), saveReviews: vi.fn(), clearHistory: vi.fn(), insights: vi.fn(), download: vi.fn(), pdfSave: vi.fn(),
 }));
 
 vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ user: { id: 1 }, isAuthenticated: true, loading: false }) }));
@@ -22,7 +22,7 @@ vi.mock("recharts", () => ({ ResponsiveContainer: ({ children }: { children: Rea
 vi.mock("@/lib/trpc", () => ({ trpc: {
   useUtils: () => ({ workspace: { load: { fetch: mocks.load } } }),
   workspace: { list: { useQuery: () => ({ data: [{ id: 5, name: "Refund workspace" }], refetch: vi.fn() }) }, create: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, saveReviews: { useMutation: () => ({ mutateAsync: mocks.saveReviews, isPending: false }) }, ask: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, clearHistory: { useMutation: () => ({ mutateAsync: mocks.clearHistory, isPending: false }) } },
-  sentiment: { analyzeBatch: { useMutation: () => ({ mutateAsync: mocks.analyzeBatch, isPending: false }) }, analyzeText: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, liveSearch: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, extractLegacyWord: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, insights: { useMutation: () => ({ mutateAsync: mocks.insights, isPending: false }) } },
+  sentiment: { analyzeBatch: { useMutation: () => ({ mutateAsync: mocks.analyzeBatch, isPending: false }) }, analyzeText: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, liveSearch: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, extractLegacyWord: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, extractDocumentReviews: { useMutation: () => ({ mutateAsync: mocks.documentReviews, isPending: false }) }, insights: { useMutation: () => ({ mutateAsync: mocks.insights, isPending: false }) } },
 } }));
 
 import SentiXDashboard from "../client/src/components/SentiXDashboard";
@@ -30,7 +30,7 @@ import SentiXDashboard from "../client/src/components/SentiXDashboard";
 const restoredReview = { id: "rv-restore", text: "Refund processing took too long.", source: "workspace.xlsx", rating: 1, category: "Refunds", label: "Negative" as const, compound: -0.72, confidence: 94, vaderCompound: -0.7, transformerConfidence: 93, transformerUsed: true, actionTag: "Investigate refunds", timestamp: 1 };
 
 beforeEach(() => {
-  mocks.load.mockReset(); mocks.extract.mockReset(); mocks.analyzeBatch.mockReset(); mocks.saveReviews.mockReset(); mocks.clearHistory.mockReset(); mocks.insights.mockReset(); mocks.download.mockReset(); mocks.pdfSave.mockReset();
+  mocks.load.mockReset(); mocks.extract.mockReset(); mocks.documentReviews.mockReset(); mocks.analyzeBatch.mockReset(); mocks.saveReviews.mockReset(); mocks.clearHistory.mockReset(); mocks.insights.mockReset(); mocks.download.mockReset(); mocks.pdfSave.mockReset();
   mocks.load.mockResolvedValue({ workspace: { id: 5, name: "Refund workspace" }, reviews: [restoredReview], messages: [{ role: "assistant", content: "Refunds require attention.", citations: [{ code: "TK-101" }], followUps: ["What should improve first?"], createdAt: 2 }] });
   mocks.extract.mockResolvedValue([{ text: "Imported feedback from a legible document.", source: "file" }]);
   mocks.insights.mockResolvedValue({ keyPositives: "Fast delivery is valued.", frictionPoints: "Refunds need attention.", recommendations: ["Improve refund updates."] });

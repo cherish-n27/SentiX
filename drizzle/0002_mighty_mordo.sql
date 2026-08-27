@@ -1,0 +1,1 @@
+ALTER TABLE `sentixWorkspaceReviews` ADD `reviewDate` varchar(100);

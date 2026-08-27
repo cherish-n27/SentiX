@@ -23,3 +23,9 @@ The rendered dashboard interaction suite selects a saved workspace, confirms tha
 The final action audit verified that the header **Export report** menu produces an enriched CSV download and an executive PDF download when analyzed reviews are available, while preserving clear feedback for empty datasets. It also verifies the assistant toolbar's transcript download, persisted prompt-history clearing, and center-header close action. The sidebar destinations now move users back to the data-chat feed or prompt-history area, and the workspace-signal destination visibly focuses the analytics rail.
 
 The completed validation ran all 15 Vitest files (32 tests), TypeScript checking, and a clean production build. The open assistant canvas was rechecked at 1280 × 720 and 1024 × 768 after the audit; its toolbar, fixed sidebar, central workspace, and evidence rail remained accessible without overlap.
+
+## Atomic Review Ingestion Validation
+
+CSV, JSON, and spreadsheet parsing now maps `id`, `date`, `source`, and `review_text` before analysis and preserves every source row as one full review. Periods and commas remain inside that review text. Extracted PDF, DOC/DOCX, TXT, and OCR text is first submitted to the server-side Hugging Face structured-output parser, which uses document separators and repeated metadata cues to create discrete review records without punctuation-based splitting. The raw review date is persisted alongside the normalized timestamp.
+
+The import pipeline rejects an unexpected post-analysis count spike before adding records to the dashboard. Regression coverage verifies CSV/JSON/XLSX metadata mapping, non-tabular AI-parser handoff, punctuation preservation, direct one-input-to-one-output scoring, persisted metadata fidelity, and count-spike detection. The full validation completed 16 Vitest files (37 tests), TypeScript checking, a non-destructive `reviewDate` migration, a production build, and a desktop import-surface review.
