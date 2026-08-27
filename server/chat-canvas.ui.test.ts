@@ -13,10 +13,18 @@ const review = { id: "rv-1", text: "The refund was delayed for too long.", sourc
 
 describe("SentiX chat canvas UI", () => {
   it("invokes citation navigation and the center-panel Close Chat action", async () => {
-    const user = userEvent.setup(); const onCitation = vi.fn(); const onClose = vi.fn();
-    render(createElement(SentiXChatCanvas, { open: true, onClose, workspaceName: "Review workspace", workspaceId: 5, reviews: [review], history: [{ role: "assistant", content: "Refunds need attention.", citations: [{ code: "TK-101", reviewId: "rv-1", aspect: "Refunds", source: "reviews.xlsx", sentiment: "Negative" }] }], onHistoryChange: vi.fn(), onAsk: vi.fn(), asking: false, onCitation, onOpenWorkspace: vi.fn() }));
+    const user = userEvent.setup(); const onCitation = vi.fn(); const onClose = vi.fn(); const onExportTranscript = vi.fn(); const onClearHistory = vi.fn();
+    render(createElement(SentiXChatCanvas, { open: true, onClose, workspaceName: "Review workspace", workspaceId: 5, reviews: [review], history: [{ role: "assistant", content: "Refunds need attention.", citations: [{ code: "TK-101", reviewId: "rv-1", aspect: "Refunds", source: "reviews.xlsx", sentiment: "Negative" }] }], onHistoryChange: vi.fn(), onAsk: vi.fn(), asking: false, onCitation, onOpenWorkspace: vi.fn(), onExportTranscript, onClearHistory }));
     await user.click(screen.getByRole("button", { name: "[TK-101]" }));
     expect(onCitation).toHaveBeenCalledWith("rv-1");
+    await user.click(screen.getByRole("button", { name: /transcript/i }));
+    expect(onExportTranscript).toHaveBeenCalledOnce();
+    await user.click(screen.getByRole("button", { name: /^clear$/i }));
+    expect(onClearHistory).toHaveBeenCalledOnce();
+    await user.click(screen.getByRole("button", { name: /^data chat$/i }));
+    await user.click(screen.getByRole("button", { name: /workspace signal/i }));
+    expect(screen.getByText("Workspace monitor").parentElement?.parentElement?.className).toContain("ring-cyan-300");
+    await user.click(screen.getByRole("button", { name: /prompt history/i }));
     await user.click(screen.getByRole("button", { name: /close chat/i }));
     expect(onClose).toHaveBeenCalledOnce();
   });

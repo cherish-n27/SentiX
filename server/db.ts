@@ -147,3 +147,9 @@ export async function addSentiXChatMessage(userId: number, workspaceId: number, 
   await db.insert(sentixChatMessages).values({ workspaceId, role: message.role, content: message.content, citations: message.citations, followUps: message.followUps });
   await db.update(sentixWorkspaces).set({ updatedAt: new Date() }).where(eq(sentixWorkspaces.id, workspaceId));
 }
+
+export async function clearSentiXChatHistory(userId: number, workspaceId: number) {
+  const { db } = await ownedWorkspace(userId, workspaceId);
+  await db.delete(sentixChatMessages).where(eq(sentixChatMessages.workspaceId, workspaceId));
+  await db.update(sentixWorkspaces).set({ updatedAt: new Date() }).where(eq(sentixWorkspaces.id, workspaceId));
+}

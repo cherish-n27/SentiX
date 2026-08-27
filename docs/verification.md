@@ -17,3 +17,9 @@ The workspace persistence-cycle test creates a workspace, saves a negative refun
 Representative import execution is validated through mocked PDF, DOCX, legacy DOC, and image OCR handlers, as well as a real XLSX workbook route. The open chat canvas was visually checked at desktop and tablet presentation widths; the application also provides a `?chat=1` deep-link for review of the fully open three-panel canvas.
 
 The rendered dashboard interaction suite selects a saved workspace, confirms that the active workspace label and restored review appear, opens the actual chat canvas, and confirms the saved assistant prompt is visible. The same suite selects representative PDF, XLSX, and PNG files through the hidden Dataset Import input and verifies each is handed to document extraction and batch analysis.
+
+## Report Export and Assistant Action Audit
+
+The final action audit verified that the header **Export report** menu produces an enriched CSV download and an executive PDF download when analyzed reviews are available, while preserving clear feedback for empty datasets. It also verifies the assistant toolbar's transcript download, persisted prompt-history clearing, and center-header close action. The sidebar destinations now move users back to the data-chat feed or prompt-history area, and the workspace-signal destination visibly focuses the analytics rail.
+
+The completed validation ran all 15 Vitest files (32 tests), TypeScript checking, and a clean production build. The open assistant canvas was rechecked at 1280 × 720 and 1024 × 768 after the audit; its toolbar, fixed sidebar, central workspace, and evidence rail remained accessible without overlap.

@@ -42,3 +42,24 @@ export function buildExecutiveReportSections(total: number, nss: number, insight
     ["Actionable recommendations", insights?.recommendations?.map(item => `• ${item}`).join("\n") ?? "Preparing evidence summary…"],
   ] as const;
 }
+
+export function safeExportName(value: string, fallback: string) {
+  const normalized = value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return normalized || fallback;
+}
+
+export function triggerDownload(content: BlobPart, fileName: string, type: string) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+export function buildChatTranscript(workspaceName: string, messages: Array<{ role: "user" | "assistant"; content: string; createdAt?: number }>) {
+  const header = `SentiX Data Insights Assistant\nWorkspace: ${workspaceName}\nGenerated: ${new Date().toISOString()}\n\n`;
+  const body = messages.map(message => `[${message.role === "user" ? "You" : "Assistant"}]${message.createdAt ? ` ${new Date(message.createdAt).toLocaleString()}` : ""}\n${message.content}`).join("\n\n");
+  return `${header}${body}`;
+}

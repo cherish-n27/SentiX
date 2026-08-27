@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildEnrichedCsv, buildExecutiveReportSections } from "./exports";
+import { buildChatTranscript, buildEnrichedCsv, buildExecutiveReportSections, safeExportName } from "./exports";
 
 describe("SentiX export payloads", () => {
   it("uses a stable enriched CSV column order and escapes review content", () => {
@@ -30,5 +30,12 @@ describe("SentiX export payloads", () => {
     expect(sections[0][1]).toContain("3 analyzed reviews");
     expect(sections[1][1]).toBe("Customers value fast delivery.");
     expect(sections[3][1]).toContain("Review delivery SLAs.");
+  });
+
+  it("creates safe names and readable assistant transcripts for download", () => {
+    expect(safeExportName(" Q1 / Returns & Delivery ", "sentix-report")).toBe("q1-returns-delivery");
+    const transcript = buildChatTranscript("Returns signal", [{ role: "user", content: "What should we fix first?", createdAt: 0 }]);
+    expect(transcript).toContain("Workspace: Returns signal");
+    expect(transcript).toContain("[You]");
   });
 });

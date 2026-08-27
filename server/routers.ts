@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { answerDataQuestion } from "./dataChat";
 import { extractLegacyWordText } from "./documentExtraction";
-import { addSentiXChatMessage, createSentiXWorkspace, listSentiXWorkspaces, loadSentiXWorkspace, replaceSentiXWorkspaceReviews } from "./db";
+import { addSentiXChatMessage, clearSentiXChatHistory, createSentiXWorkspace, listSentiXWorkspaces, loadSentiXWorkspace, replaceSentiXWorkspaceReviews } from "./db";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { analyzeReviews, buildInsights, searchReviews } from "./sentiment";
@@ -44,6 +44,7 @@ export const appRouter = router({
     load: protectedProcedure.input(z.object({ workspaceId: z.number().int().positive() })).query(({ ctx, input }) => loadSentiXWorkspace(ctx.user.id, input.workspaceId)),
     saveReviews: protectedProcedure.input(z.object({ workspaceId: z.number().int().positive(), reviews: z.array(z.object({ id: z.string().max(100), text: z.string().max(5000), author: z.string().optional(), source: z.string().optional(), rating: z.number().nullable().optional(), category: z.string().max(160), label: z.enum(["Positive", "Neutral", "Negative"]), compound: z.number(), confidence: z.number().int(), vaderCompound: z.number(), transformerConfidence: z.number().int().nullable(), transformerUsed: z.boolean(), actionTag: z.string().max(255), timestamp: z.number() })).max(100) })).mutation(({ ctx, input }) => replaceSentiXWorkspaceReviews(ctx.user.id, input.workspaceId, input.reviews)),
     ask: protectedProcedure.input(z.object({ workspaceId: z.number().int().positive(), question: z.string().min(2).max(1000) })).mutation(async ({ ctx, input }) => { const workspace = await loadSentiXWorkspace(ctx.user.id, input.workspaceId); const history = workspace.messages.map(message => ({ role: message.role, content: message.content })); const reply = await answerDataQuestion(input.question, workspace.reviews, history); await addSentiXChatMessage(ctx.user.id, input.workspaceId, { role: "user", content: input.question }); await addSentiXChatMessage(ctx.user.id, input.workspaceId, { role: "assistant", content: reply.answer, citations: reply.citations, followUps: reply.followUps }); return reply; }),
+    clearHistory: protectedProcedure.input(z.object({ workspaceId: z.number().int().positive() })).mutation(async ({ ctx, input }) => { await clearSentiXChatHistory(ctx.user.id, input.workspaceId); return { success: true } as const; }),
   }),
 });
 

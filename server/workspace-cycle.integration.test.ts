@@ -12,6 +12,7 @@ vi.mock("./db", () => ({
   listSentiXWorkspaces: vi.fn(async () => [cycle.workspace]),
   replaceSentiXWorkspaceReviews: vi.fn(async (_userId: number, _workspaceId: number, reviews: Array<Record<string, unknown>>) => { cycle.reviews = reviews; }),
   addSentiXChatMessage: vi.fn(async (_userId: number, _workspaceId: number, message: Record<string, unknown>) => { cycle.messages.push({ ...message, createdAt: Date.now() }); }),
+  clearSentiXChatHistory: vi.fn(async () => { cycle.messages = []; }),
   loadSentiXWorkspace: vi.fn(async () => ({ workspace: cycle.workspace, reviews: cycle.reviews, messages: cycle.messages })),
 }));
 
@@ -34,5 +35,8 @@ describe("SentiX workspace persistence cycle", () => {
     expect(restored.messages).toHaveLength(2);
     expect(restored.messages[0]).toMatchObject({ role: "user", content: "What needs attention?" });
     expect(restored.messages[1]).toMatchObject({ role: "assistant", citations: [{ code: "TK-101", reviewId: "rv-1", aspect: "Refunds", source: "xlsx", sentiment: "Negative" }] });
+    await caller.workspace.clearHistory({ workspaceId: created.id });
+    const cleared = await caller.workspace.load({ workspaceId: created.id });
+    expect(cleared.messages).toHaveLength(0);
   });
 });

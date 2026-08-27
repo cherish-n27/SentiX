@@ -39,3 +39,8 @@
 - [x] Add regression coverage for the VADER runtime health-check result and fallback-mode reporting.
 - [x] Complete VADER runtime health detection before the SentiX server begins accepting requests.
 - [x] Add behavioral tests for healthy and fallback VADER startup-health outcomes.
+- [x] Audit every visible SentiX dashboard and Data Insights Assistant control for incomplete, inactive, or placeholder behavior.
+- [x] Complete report export controls, including empty-state handling and all visible export entry points.
+- [x] Complete Data Insights Assistant tools, including follow-up prompts, chat actions, history controls, citations, and reference-feed interactions.
+- [x] Add regression tests for completed report export and Data Insights Assistant action flows.
+- [x] Make the Data Insights Assistant sidebar destinations functional for returning to the message feed, prompt history, and workspace signal rail.

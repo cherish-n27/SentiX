@@ -8,5 +8,6 @@ describe("SentiX workspace persistence contract", () => {
     expect(appRouter._def.procedures["workspace.load"]).toBeDefined();
     expect(appRouter._def.procedures["workspace.saveReviews"]).toBeDefined();
     expect(appRouter._def.procedures["workspace.ask"]).toBeDefined();
+    expect(appRouter._def.procedures["workspace.clearHistory"]).toBeDefined();
   });
 });
