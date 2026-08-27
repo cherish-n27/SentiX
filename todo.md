@@ -48,3 +48,5 @@
 - [x] Map review IDs, dates, sources, and review text into separate structured fields before any NLP processing.
 - [x] Add AI-assisted structured review-boundary extraction for non-tabular document text without comma or period splitting.
 - [x] Add post-ingest record-count validation and regression tests that detect unintended review fragmentation.
+- [x] Automatically create and persist a workspace for an authenticated active analysis before allowing data-chat access.
+- [x] Add regression coverage that confirms automatic workspace creation, review persistence, and data-chat readiness.

@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createElement, type ReactNode } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  load: vi.fn(), extract: vi.fn(), documentReviews: vi.fn(), analyzeBatch: vi.fn(), saveReviews: vi.fn(), clearHistory: vi.fn(), insights: vi.fn(), download: vi.fn(), pdfSave: vi.fn(),
+  load: vi.fn(), create: vi.fn(), extract: vi.fn(), documentReviews: vi.fn(), analyzeBatch: vi.fn(), saveReviews: vi.fn(), clearHistory: vi.fn(), insights: vi.fn(), download: vi.fn(), pdfSave: vi.fn(),
 }));
 
 vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ user: { id: 1 }, isAuthenticated: true, loading: false }) }));
@@ -14,14 +14,14 @@ vi.mock("@/components/ui/button", () => ({ Button: ({ children, ...props }: Reac
 vi.mock("@/components/ui/input", () => ({ Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => createElement("input", props) }));
 vi.mock("streamdown", () => ({ Streamdown: ({ children }: { children: string }) => createElement("div", null, children) }));
 vi.mock("@/components/ui/scroll-area", () => ({ ScrollArea: ({ children }: { children: ReactNode }) => createElement("div", null, children) }));
-vi.mock("@/lib/documentImport", () => ({ isSupportedImport: () => true, extractImportDrafts: (...args: unknown[]) => mocks.extract(...args) }));
+vi.mock("@/lib/documentImport", async importOriginal => ({ ...(await importOriginal<typeof import("@/lib/documentImport")>()), isSupportedImport: () => true, extractImportDrafts: (...args: unknown[]) => mocks.extract(...args) }));
 vi.mock("@/lib/exports", async importOriginal => ({ ...(await importOriginal<typeof import("@/lib/exports")>()), triggerDownload: (...args: unknown[]) => mocks.download(...args) }));
 vi.mock("jspdf", () => ({ jsPDF: class { splitTextToSize(text: string) { return [text]; } setFont() {} setFontSize() {} text() {} addPage() {} save(name: string) { mocks.pdfSave(name); } } }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), message: vi.fn() } }));
 vi.mock("recharts", () => ({ ResponsiveContainer: ({ children }: { children: ReactNode }) => createElement("div", null, children), PieChart: ({ children }: { children: ReactNode }) => createElement("div", null, children), Pie: ({ children }: { children: ReactNode }) => createElement("div", null, children), Cell: () => null, Legend: () => null, LineChart: ({ children }: { children: ReactNode }) => createElement("div", null, children), Line: () => null, XAxis: () => null, YAxis: () => null, Tooltip: () => null }));
 vi.mock("@/lib/trpc", () => ({ trpc: {
   useUtils: () => ({ workspace: { load: { fetch: mocks.load } } }),
-  workspace: { list: { useQuery: () => ({ data: [{ id: 5, name: "Refund workspace" }], refetch: vi.fn() }) }, create: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, saveReviews: { useMutation: () => ({ mutateAsync: mocks.saveReviews, isPending: false }) }, ask: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, clearHistory: { useMutation: () => ({ mutateAsync: mocks.clearHistory, isPending: false }) } },
+  workspace: { list: { useQuery: () => ({ data: [{ id: 5, name: "Refund workspace" }], refetch: vi.fn() }) }, create: { useMutation: () => ({ mutateAsync: mocks.create, isPending: false }) }, saveReviews: { useMutation: () => ({ mutateAsync: mocks.saveReviews, isPending: false }) }, ask: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, clearHistory: { useMutation: () => ({ mutateAsync: mocks.clearHistory, isPending: false }) } },
   sentiment: { analyzeBatch: { useMutation: () => ({ mutateAsync: mocks.analyzeBatch, isPending: false }) }, analyzeText: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, liveSearch: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, extractLegacyWord: { useMutation: () => ({ mutateAsync: vi.fn(), isPending: false }) }, extractDocumentReviews: { useMutation: () => ({ mutateAsync: mocks.documentReviews, isPending: false }) }, insights: { useMutation: () => ({ mutateAsync: mocks.insights, isPending: false }) } },
 } }));
 
@@ -30,22 +30,32 @@ import SentiXDashboard from "../client/src/components/SentiXDashboard";
 const restoredReview = { id: "rv-restore", text: "Refund processing took too long.", source: "workspace.xlsx", rating: 1, category: "Refunds", label: "Negative" as const, compound: -0.72, confidence: 94, vaderCompound: -0.7, transformerConfidence: 93, transformerUsed: true, actionTag: "Investigate refunds", timestamp: 1 };
 
 beforeEach(() => {
-  mocks.load.mockReset(); mocks.extract.mockReset(); mocks.documentReviews.mockReset(); mocks.analyzeBatch.mockReset(); mocks.saveReviews.mockReset(); mocks.clearHistory.mockReset(); mocks.insights.mockReset(); mocks.download.mockReset(); mocks.pdfSave.mockReset();
+  mocks.load.mockReset(); mocks.create.mockReset(); mocks.extract.mockReset(); mocks.documentReviews.mockReset(); mocks.analyzeBatch.mockReset(); mocks.saveReviews.mockReset(); mocks.clearHistory.mockReset(); mocks.insights.mockReset(); mocks.download.mockReset(); mocks.pdfSave.mockReset();
   mocks.load.mockResolvedValue({ workspace: { id: 5, name: "Refund workspace" }, reviews: [restoredReview], messages: [{ role: "assistant", content: "Refunds require attention.", citations: [{ code: "TK-101" }], followUps: ["What should improve first?"], createdAt: 2 }] });
+  mocks.create.mockResolvedValue({ id: 17, name: "Customer feedback workspace" });
   mocks.extract.mockResolvedValue([{ text: "Imported feedback from a legible document.", source: "file" }]);
   mocks.insights.mockResolvedValue({ keyPositives: "Fast delivery is valued.", frictionPoints: "Refunds need attention.", recommendations: ["Improve refund updates."] });
   let importIndex = 0;
   mocks.analyzeBatch.mockImplementation(async () => [{ ...restoredReview, id: `rv-import-${++importIndex}`, text: "Imported feedback from a legible document." }]);
 });
+afterEach(() => cleanup());
 
 describe("SentiX dashboard rendered interactions", () => {
+  it("automatically saves a workspace and opens Data chat when no manual workspace exists", async () => {
+    const user = userEvent.setup(); render(createElement(SentiXDashboard));
+    await user.click(screen.getByRole("button", { name: /^data chat$/i }));
+    await waitFor(() => expect(mocks.create).toHaveBeenCalledWith({ name: "Customer feedback workspace" }));
+    expect(await screen.findByText("Data Insights Assistant")).toBeTruthy();
+    expect(screen.getByText("Customer feedback workspace")).toBeTruthy();
+  });
+
   it("restores selected workspace reviews and prompt history into the dashboard UI", async () => {
     const user = userEvent.setup(); render(createElement(SentiXDashboard));
     await user.selectOptions(screen.getAllByRole("combobox")[0]!, "5");
     await waitFor(() => expect(mocks.load).toHaveBeenCalledWith({ workspaceId: 5 }));
     expect(await screen.findByText("Active: Refund workspace")).toBeTruthy();
     expect(screen.getAllByText("Refund processing took too long.").length).toBeGreaterThan(0);
-    await user.click(screen.getByRole("button", { name: /data chat/i }));
+    await user.click(screen.getAllByRole("button", { name: /data chat/i })[0]!);
     expect(await screen.findByText("Refunds require attention.")).toBeTruthy();
   });
 
@@ -58,6 +68,8 @@ describe("SentiX dashboard rendered interactions", () => {
     }
     expect(mocks.extract).toHaveBeenCalledTimes(3);
     expect(mocks.analyzeBatch).toHaveBeenCalledTimes(3);
+    await waitFor(() => expect(mocks.create).toHaveBeenCalledWith({ name: "Customer feedback workspace" }));
+    await waitFor(() => expect(mocks.saveReviews).toHaveBeenCalledWith(expect.objectContaining({ workspaceId: 17, reviews: [expect.objectContaining({ id: "rv-import-1" })] })));
   });
 
   it("downloads enriched CSV and executive PDF reports from the visible export control", async () => {
