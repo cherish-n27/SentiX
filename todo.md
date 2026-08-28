@@ -85,3 +85,11 @@
 - [x] Refine zero-data dashboard empty states with branded guidance and stronger semantic hierarchy, then add regression or managed-preview verification for authenticated empty-state views.
 - [x] Extend the rendered auth-flow regression to mount the protected dashboard after successful account submission and assert protected shell content renders.
 - [x] Add explicit zero-data dashboard assertions for the branded chart, engine, and review-table guidance copy.
+- [x] Activate the responsive authenticated side drawer with a mobile menu trigger and close behavior.
+- [x] Make Home the first authenticated navigator and remove the Public home sidebar label/duplicate route entry.
+- [x] Prevent `/login?mode=signup` from redirecting to the dashboard until a real successful form submission completes.
+- [x] Add route and drawer interaction coverage and verify Home, Workbenches, Quick Analysis, and account-entry routes.
+- [x] Add explicit authenticated-shell coverage for `/workbenches` and `/quick-analysis`, including Home-first navigation and expected dashboard sections.
+- [x] Document live verification of Home, Workbenches, Quick Analysis, and account-entry routes after the drawer update.
+- [x] Add targeted non-mocked section assertions for authenticated `/workbenches` and `/quick-analysis` alias loads.
+- [x] Run and document live verification for `/dashboard`, `/workbenches`, `/quick-analysis`, `/login?mode=signup`, and `/login?mode=signin` after the drawer update.

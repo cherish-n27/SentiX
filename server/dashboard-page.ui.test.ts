@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { createElement } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ startLogin: vi.fn(), auth: { isAuthenticated: false, loading: false, user: null as { name?: string; email?: string } | null } }));
 
@@ -13,6 +13,7 @@ vi.mock("@/components/ui/button", () => ({ Button: ({ children, ...props }: Reac
 import Dashboard from "../client/src/pages/Dashboard";
 
 describe("protected SentiX dashboard route", () => {
+  afterEach(() => cleanup());
   beforeEach(() => { mocks.startLogin.mockReset(); mocks.auth = { isAuthenticated: false, loading: false, user: null }; });
 
   it("directs guests to sign in instead of exposing the dashboard", async () => {
@@ -25,8 +26,23 @@ describe("protected SentiX dashboard route", () => {
   it("renders a distinct persistent application shell for authenticated users", () => {
     mocks.auth = { isAuthenticated: true, loading: false, user: { name: "SentiX User", email: "user@example.com" } };
     render(createElement(Dashboard));
-    expect(screen.getByLabelText("Dashboard navigation")).toBeTruthy();
+    expect(screen.getAllByLabelText("Dashboard navigation")).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Home" })).toHaveLength(2);
+    expect(screen.queryByText("Public home")).toBeNull();
     expect(screen.getByText("Private dashboard content")).toBeTruthy();
-    expect(screen.getByText("Public home")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Open navigation" }));
+    expect(screen.getByLabelText("Mobile navigation drawer").className).toContain("translate-x-0");
+    fireEvent.click(screen.getAllByRole("button", { name: "Close navigation" })[0]!);
+    expect(screen.getByLabelText("Mobile navigation drawer").className).toContain("-translate-x-full");
+  });
+
+  it.each(["/workbenches", "/quick-analysis"])("renders the authenticated app shell on %s", (path) => {
+    mocks.auth = { isAuthenticated: true, loading: false, user: { name: "SentiX User", email: "user@example.com" } };
+    window.history.replaceState({}, "", path);
+    render(createElement(Dashboard));
+    expect(screen.getByText("Private dashboard content")).toBeTruthy();
+    expect(screen.getAllByRole("link", { name: "Home" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Workbenches" })).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Quick Analysis" })).toHaveLength(2);
   });
 });

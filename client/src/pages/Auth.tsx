@@ -1,4 +1,3 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getAccountEntryPath, startHostedLogin } from "@/const";
@@ -20,7 +19,6 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const { isAuthenticated, loading } = useAuth();
   const utils = trpc.useUtils();
 
   const completeAccountEntry = async () => {
@@ -31,10 +29,6 @@ export default function Auth() {
   const register = trpc.auth.register.useMutation({ onSuccess: () => void completeAccountEntry() });
   const login = trpc.auth.login.useMutation({ onSuccess: () => void completeAccountEntry() });
   const pending = register.isPending || login.isPending;
-
-  useEffect(() => {
-    if (!loading && isAuthenticated) setLocation("/dashboard");
-  }, [isAuthenticated, loading, setLocation]);
 
   const changeMode = (nextMode: AuthMode) => {
     setMode(nextMode);

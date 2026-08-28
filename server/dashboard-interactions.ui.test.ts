@@ -62,6 +62,16 @@ describe("SentiX dashboard rendered interactions", () => {
     window.history.replaceState({}, "", "/");
   });
 
+  it.each(["/workbenches", "/quick-analysis#quick-analysis"])("loads the intended dashboard sections on the %s alias", (path) => {
+    window.history.replaceState({}, "", path);
+    render(createElement(SentiXDashboard));
+    expect(screen.getByText("Live web search")).toBeTruthy();
+    expect(screen.getByText("Dataset import")).toBeTruthy();
+    expect(screen.getAllByText("Quick analysis").length).toBeGreaterThan(0);
+    expect(screen.getByText("Engine Breakdown")).toBeTruthy();
+    window.history.replaceState({}, "", "/");
+  });
+
   it("communicates the next evidence-led action across zero-data dashboard states", () => {
     render(createElement(SentiXDashboard));
     expect(screen.getByText("Your signal map will appear here once review evidence is analyzed.")).toBeTruthy();

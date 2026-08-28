@@ -69,7 +69,7 @@ describe("SentiX local account page", () => {
     expect(mocks.invalidate).toHaveBeenCalledOnce();
     await vi.waitFor(() => expect(mocks.setLocation).toHaveBeenLastCalledWith("/dashboard"));
     render(createElement(Dashboard));
-    expect(screen.getByLabelText("Dashboard navigation")).toBeTruthy();
+    expect(screen.getAllByLabelText("Dashboard navigation")).toHaveLength(2);
     expect(screen.getByText("Protected dashboard content")).toBeTruthy();
   });
 
