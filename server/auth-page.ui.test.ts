@@ -9,9 +9,11 @@ const mocks = vi.hoisted(() => ({
   authState: { isAuthenticated: false, loading: false, user: null as { name?: string; email?: string } | null },
   register: vi.fn(),
   login: vi.fn(),
+  startHostedLogin: vi.fn(),
 }));
 
 vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => mocks.authState }));
+vi.mock("@/const", () => ({ getAccountEntryPath: (mode: "signIn" | "signUp") => `/login?mode=${mode === "signUp" ? "signup" : "signin"}`, startHostedLogin: mocks.startHostedLogin }));
 vi.mock("@/components/ui/button", () => ({ Button: ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => createElement("button", props, children) }));
 vi.mock("@/components/ui/input", () => ({ Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => createElement("input", props) }));
 vi.mock("@/components/SentiXDashboard", () => ({ default: () => createElement("div", null, "Protected dashboard content") }));
@@ -71,6 +73,13 @@ describe("SentiX local account page", () => {
     render(createElement(Dashboard));
     expect(screen.getAllByLabelText("Dashboard navigation")).toHaveLength(2);
     expect(screen.getByText("Protected dashboard content")).toBeTruthy();
+  });
+
+  it("opens the secure hosted Google sign-in flow from the local account screen", () => {
+    window.history.replaceState({}, "", "/login?mode=signin");
+    render(createElement(Auth));
+    fireEvent.click(screen.getByRole("button", { name: /continue with google/i }));
+    expect(mocks.startHostedLogin).toHaveBeenCalledWith("signIn");
   });
 
   it("recovers an existing account into the protected dashboard after a valid sign-in", async () => {

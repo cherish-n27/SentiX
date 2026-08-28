@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import SentiXDashboard from "@/components/SentiXDashboard";
+import Workbenches from "@/pages/Workbenches";
 import { Button } from "@/components/ui/button";
 import { startLogin } from "@/const";
 import { BarChart3, FileSearch, Home, LayoutDashboard, LogOut, Menu, Sparkles, X } from "lucide-react";
@@ -23,6 +24,7 @@ function Navigation({ onNavigate, mobile = false }: { onNavigate?: () => void; m
 
 function SentiXAppShell() {
   const { user, logout } = useAuth();
+  const [location] = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const closeDrawer = () => setDrawerOpen(false);
 
@@ -48,7 +50,7 @@ function SentiXAppShell() {
     </aside>
     <div className="min-w-0 flex-1 lg:pl-64">
       <div className="flex items-center gap-3 border-b border-[#323846] bg-[#161B26] px-4 py-3 lg:hidden"><Button variant="outline" size="icon" aria-label="Open navigation" onClick={() => setDrawerOpen(true)} className="border-[#323846] bg-[#1D232F] text-[#F5F7FA]"><Menu className="h-5 w-5" /></Button><div><p className="text-sm font-extrabold text-[#F5F7FA]">Home</p><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#8B93A3]">SentiX workspace</p></div></div>
-      <SentiXDashboard embedded />
+      {location.split("#")[0] === "/workbenches" ? <Workbenches /> : <SentiXDashboard embedded />}
     </div>
   </div>;
 }

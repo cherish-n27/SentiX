@@ -206,6 +206,13 @@ export default function SentiXDashboard({ embedded = false }: { embedded?: boole
   const openChat = async () => { if (!workspaceId && !await ensureAutoSavedWorkbench()) return; setChatOpen(true); };
   const openQuickAnalysis = () => { setChatOpen(false); window.setTimeout(() => { document.getElementById("quick-analysis")?.scrollIntoView({ behavior: "smooth", block: "center" }); quickInputRef.current?.focus(); }, 0); };
   useEffect(() => { if (isAuthenticated && !workspaceId && reviews.length) void ensureAutoSavedWorkbench(reviews, reviews[0]?.text); }, [isAuthenticated, reviews, workspaceId]);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const params = new URLSearchParams(window.location.search);
+    const requestedWorkspaceId = Number(params.get("workspaceId"));
+    if (requestedWorkspaceId > 0 && requestedWorkspaceId !== workspaceId) void openWorkbench(requestedWorkspaceId);
+    if (params.get("chat") === "1" && !workspaceId && !reviews.length) void ensureAutoSavedWorkbench([], "New customer feedback chat");
+  }, [isAuthenticated, workspaceId]);
   const exportCsv = () => {
     if (!reviews.length) return toast.error("Analyze feedback before exporting a report.");
     setExporting("csv");

@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({ startLogin: vi.fn(), auth: { isAuthenticated: 
 vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ ...mocks.auth, logout: vi.fn() }) }));
 vi.mock("@/const", () => ({ startLogin: mocks.startLogin }));
 vi.mock("@/components/SentiXDashboard", () => ({ default: () => createElement("div", null, "Private dashboard content") }));
+vi.mock("@/pages/Workbenches", () => ({ default: () => createElement("div", null, "Saved workbenches") }));
 vi.mock("@/components/ui/button", () => ({ Button: ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => createElement("button", props, children) }));
 
 import Dashboard from "../client/src/pages/Dashboard";
@@ -40,7 +41,7 @@ describe("protected SentiX dashboard route", () => {
     mocks.auth = { isAuthenticated: true, loading: false, user: { name: "SentiX User", email: "user@example.com" } };
     window.history.replaceState({}, "", path);
     render(createElement(Dashboard));
-    expect(screen.getByText("Private dashboard content")).toBeTruthy();
+    expect(screen.getByText(path === "/workbenches" ? "Saved workbenches" : "Private dashboard content")).toBeTruthy();
     expect(screen.getAllByRole("link", { name: "Home" })).toHaveLength(2);
     expect(screen.getAllByRole("link", { name: "Workbenches" })).toHaveLength(2);
     expect(screen.getAllByRole("link", { name: "Quick Analysis" })).toHaveLength(2);

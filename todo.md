@@ -93,3 +93,7 @@
 - [x] Document live verification of Home, Workbenches, Quick Analysis, and account-entry routes after the drawer update.
 - [x] Add targeted non-mocked section assertions for authenticated `/workbenches` and `/quick-analysis` alias loads.
 - [x] Run and document live verification for `/dashboard`, `/workbenches`, `/quick-analysis`, `/login?mode=signup`, and `/login?mode=signin` after the drawer update.
+- [x] Activate real Google sign-in from the SentiX account screen using the existing secure OAuth flow.
+- [x] Repair drawer open/close controls and make all authenticated navigation actions route to their designated pages.
+- [x] Build a functional Workbenches page showing existing workbenches, saved chat history, current-workbench stats, and a real New Chat action.
+- [x] Add regression coverage for Google sign-in entry, drawer controls, workbench revisit data, stats, and New Chat navigation.
