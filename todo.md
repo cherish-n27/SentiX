@@ -97,3 +97,7 @@
 - [x] Repair drawer open/close controls and make all authenticated navigation actions route to their designated pages.
 - [x] Build a functional Workbenches page showing existing workbenches, saved chat history, current-workbench stats, and a real New Chat action.
 - [x] Add regression coverage for Google sign-in entry, drawer controls, workbench revisit data, stats, and New Chat navigation.
+- [x] Refine the authenticated drawer into a clearer true desktop/mobile sidebar and remove Quick Analysis from its navigation.
+- [x] Verify supported document upload handoff and pre-AI review-identification loading/error states for PDF, Word, Excel, CSV, TXT, PNG/JPG, and JSON.
+- [x] Add regression coverage for the sidebar navigation, supported uploads, and pre-AI review identification.
+- [x] Make the fixed Ask SentiX AI button glow and feel live while respecting reduced-motion accessibility.

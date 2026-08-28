@@ -29,8 +29,11 @@ describe("protected SentiX dashboard route", () => {
     render(createElement(Dashboard));
     expect(screen.getAllByLabelText("Dashboard navigation")).toHaveLength(2);
     expect(screen.getAllByRole("link", { name: "Home" })).toHaveLength(2);
+    expect(screen.queryByRole("link", { name: "Quick Analysis" })).toBeNull();
     expect(screen.queryByText("Public home")).toBeNull();
     expect(screen.getByText("Private dashboard content")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Collapse sidebar" }));
+    expect(screen.getByRole("button", { name: "Expand sidebar" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Open navigation" }));
     expect(screen.getByLabelText("Mobile navigation drawer").className).toContain("translate-x-0");
     fireEvent.click(screen.getAllByRole("button", { name: "Close navigation" })[0]!);
@@ -41,9 +44,8 @@ describe("protected SentiX dashboard route", () => {
     mocks.auth = { isAuthenticated: true, loading: false, user: { name: "SentiX User", email: "user@example.com" } };
     window.history.replaceState({}, "", path);
     render(createElement(Dashboard));
-    expect(screen.getByText(path === "/workbenches" ? "Saved workbenches" : "Private dashboard content")).toBeTruthy();
+    expect(screen.getAllByText(path === "/workbenches" ? "Saved workbenches" : "Private dashboard content").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Home" })).toHaveLength(2);
     expect(screen.getAllByRole("link", { name: "Workbenches" })).toHaveLength(2);
-    expect(screen.getAllByRole("link", { name: "Quick Analysis" })).toHaveLength(2);
   });
 });
