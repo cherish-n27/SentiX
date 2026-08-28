@@ -1,20 +1,67 @@
-import { COOKIE_NAME } from "@shared/const";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { sdk } from "./_core/sdk";
 import { answerDataQuestion } from "./dataChat";
 import { extractLegacyWordText } from "./documentExtraction";
 import { extractDocumentReviews } from "./documentReviewParsing";
-import { addSentiXChatMessage, clearSentiXChatHistory, createSentiXWorkspace, listSentiXQuickAnalyses, listSentiXWorkspaces, loadSentiXWorkspace, renameSentiXWorkspace, replaceSentiXWorkspaceReviews, saveSentiXQuickAnalyses } from "./db";
+import { addSentiXChatMessage, clearSentiXChatHistory, createLocalAccount, createSentiXWorkspace, getLocalAccountCredential, listSentiXQuickAnalyses, listSentiXWorkspaces, loadSentiXWorkspace, LocalAccountEmailTakenError, renameSentiXWorkspace, replaceSentiXWorkspaceReviews, saveSentiXQuickAnalyses, upsertUser } from "./db";
+import { hashPassword, verifyPassword } from "./localAuth";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { analyzeReviews, buildInsights, searchReviews } from "./sentiment";
 import { suggestWorkbenchName } from "./workbenchNaming";
+
+const accountInput = z.object({
+  email: z.string().trim().toLowerCase().email().max(320),
+  password: z.string().min(10, "Use at least 10 characters.").max(128),
+});
+
+function publicUser(user: { id: number; name: string | null; email: string | null; loginMethod: string | null }) {
+  return { id: user.id, name: user.name, email: user.email, loginMethod: user.loginMethod };
+}
+
+async function setLocalSession(ctx: { req: Parameters<typeof getSessionCookieOptions>[0]; res: { cookie: (name: string, value: string, options: Record<string, unknown>) => unknown } }, user: { openId: string; name: string | null }) {
+  const sessionToken = await sdk.createSessionToken(user.openId, { name: user.name || "SentiX user", expiresInMs: ONE_YEAR_MS });
+  ctx.res.cookie(COOKIE_NAME, sessionToken, { ...getSessionCookieOptions(ctx.req), maxAge: ONE_YEAR_MS });
+}
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
+    register: publicProcedure
+      .input(accountInput.extend({ name: z.string().trim().min(2, "Enter your name.").max(120) }))
+      .mutation(async ({ ctx, input }) => {
+        try {
+          const user = await createLocalAccount({
+            name: input.name,
+            email: input.email,
+            passwordHash: await hashPassword(input.password),
+          });
+          await setLocalSession(ctx, user);
+          return { user: publicUser(user) };
+        } catch (error) {
+          if (error instanceof LocalAccountEmailTakenError) {
+            throw new TRPCError({ code: "CONFLICT", message: "An account already exists for this email address. Sign in instead." });
+          }
+          throw error;
+        }
+      }),
+    login: publicProcedure
+      .input(accountInput)
+      .mutation(async ({ ctx, input }) => {
+        const account = await getLocalAccountCredential(input.email);
+        const passwordMatches = account ? await verifyPassword(input.password, account.passwordHash) : false;
+        if (!account || !passwordMatches) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Incorrect email or password." });
+        }
+        await upsertUser({ openId: account.user.openId, lastSignedIn: new Date() });
+        await setLocalSession(ctx, account.user);
+        return { user: publicUser(account.user) };
+      }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });

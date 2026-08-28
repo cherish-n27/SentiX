@@ -51,3 +51,11 @@ The `/dashboard`, `/workbenches`, and `/quick-analysis` routes are protected. Un
 Browser-level verification additionally submitted a public guest review and confirmed its complete result state. The live browser also confirmed direct protected-route redirection. Managed preview screenshots confirmed readable light-mode dashboard and tri-fold chat surfaces, including card boundaries, semantic KPI colors, badge treatments, actions, and panel dividers.
 
 Interactive browser sign-in was intentionally skipped under the revised access-validation scope. Public Guest Quick Analysis remains available without an account. The landing page explicitly opens the hosted account service in `signIn` or `signUp` mode according to the selected call to action, while protected application routes use `signIn` when opened without a session.
+
+## Local Account Authentication Repair
+
+The first-party account route now supports distinct Sign In and Create Account modes with server-side scrypt password hashing, HTTP-only signed sessions, protected-route recovery, and an optional hosted-account continuity link. A disposable end-to-end check registered an account, signed in, accessed the protected `workspace.list` procedure with the issued cookie, and returned an authenticated empty workspace list. The temporary account and credentials were removed and verified absent. The account page and the polished dashboard/chat deep-link state were covered by rendered regression tests.
+
+## Authentication Repair and Dashboard Polish
+
+SentiX now uses a first-party email-and-password account route as the default Sign In and Create Account experience. Registration and login issue the existing signed HTTP-only session, while an optional hosted-account link preserves continuity for earlier provider-managed accounts. Rendered coverage submits both forms, waits for auth invalidation and `/dashboard` navigation, and mounts the protected application shell after recovery. The authenticated dashboard now exposes a branded analysis-control header and actionable zero-data guidance for signal maps, polarity trends, engine comparison, and review evidence. Final validation completed 25 Vitest files with 60 passing tests, TypeScript checking, a production build, a healthy JavaScript VADER runtime, and managed-preview dashboard/chat checks.

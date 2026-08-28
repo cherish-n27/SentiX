@@ -53,6 +53,23 @@ describe("SentiX dashboard rendered interactions", () => {
     expect(screen.getAllByText("Customer feedback workbench").length).toBeGreaterThan(0);
   });
 
+  it("opens the tri-fold assistant from the authenticated chat deep link", () => {
+    window.history.replaceState({}, "", "/dashboard?chat=1");
+    render(createElement(SentiXDashboard));
+    const dialog = screen.getByRole("dialog", { hidden: true });
+    expect(dialog.getAttribute("aria-hidden")).toBe("false");
+    expect(dialog.className).toContain("opacity-100");
+    window.history.replaceState({}, "", "/");
+  });
+
+  it("communicates the next evidence-led action across zero-data dashboard states", () => {
+    render(createElement(SentiXDashboard));
+    expect(screen.getByText("Your signal map will appear here once review evidence is analyzed.")).toBeTruthy();
+    expect(screen.getByText("Import or search for review evidence above to plot the polarity trend.")).toBeTruthy();
+    expect(screen.getByText("No evidence loaded yet. Import a review file above to compare VADER, Hugging Face, and final signals.")).toBeTruthy();
+    expect(screen.getByText("No review evidence in view. Import a document or run Live web search above to begin.")).toBeTruthy();
+  });
+
   it("restores selected workspace reviews and prompt history into the dashboard UI", async () => {
     const user = userEvent.setup(); render(createElement(SentiXDashboard));
     await user.selectOptions(screen.getAllByRole("combobox")[0]!, "5");

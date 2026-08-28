@@ -77,3 +77,11 @@
 - [x] Confirm the public Guest Quick Analysis and basic Sign In/Sign Up entry points remain available without requiring interactive browser login for final verification.
 - [x] Provide distinct public Sign Up and Sign In account-entry modes through the existing authentication provider.
 - [x] Add a regression test for the distinct public account-entry modes and revise the access-validation record.
+- [x] Diagnose and repair the reported SentiX sign-in and authenticated-session failure without weakening protected-route security.
+- [x] Add regression coverage for successful account-entry redirect construction and authenticated-route recovery.
+- [x] Polish the public account-entry guidance and authenticated dashboard shell for clearer, more reliable user onboarding.
+- [x] Make the authenticated chat deep link visibly open the tri-fold assistant and improve the dashboard’s branded empty states and semantic data hierarchy.
+- [x] Add a rendered Auth-flow regression that submits the first-party Sign In/Create Account form, asserts auth invalidation and navigation to `/dashboard`, and confirms protected dashboard content renders after recovery.
+- [x] Refine zero-data dashboard empty states with branded guidance and stronger semantic hierarchy, then add regression or managed-preview verification for authenticated empty-state views.
+- [x] Extend the rendered auth-flow regression to mount the protected dashboard after successful account submission and assert protected shell content renders.
+- [x] Add explicit zero-data dashboard assertions for the branded chart, engine, and review-table guidance copy.

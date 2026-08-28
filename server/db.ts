@@ -1,6 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, sentixChatMessages, sentixQuickAnalyses, sentixWorkspaceReviews, sentixWorkspaces, users } from "../drizzle/schema";
+import { randomUUID } from "node:crypto";
+import { InsertUser, sentixChatMessages, sentixLocalAccounts, sentixQuickAnalyses, sentixWorkspaceReviews, sentixWorkspaces, users, type User } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -87,6 +88,60 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+export class LocalAccountEmailTakenError extends Error {
+  constructor() {
+    super("An account already exists for this email address.");
+    this.name = "LocalAccountEmailTakenError";
+  }
+}
+
+export type LocalAccountCredential = {
+  user: User;
+  passwordHash: string;
+};
+
+export async function createLocalAccount(input: { name: string; email: string; passwordHash: string }): Promise<User> {
+  const db = await getDb();
+  if (!db) throw new Error("Account storage is unavailable.");
+
+  try {
+    return await db.transaction(async (tx) => {
+      const existingUser = await tx.select({ id: users.id }).from(users).where(eq(users.email, input.email)).limit(1);
+      if (existingUser[0]) throw new LocalAccountEmailTakenError();
+      const openId = `local_${randomUUID().replaceAll("-", "")}`;
+      const insertedUser = await tx.insert(users).values({
+        openId,
+        name: input.name,
+        email: input.email,
+        loginMethod: "password",
+        lastSignedIn: new Date(),
+      });
+      const userId = Number(insertedUser[0].insertId);
+      await tx.insert(sentixLocalAccounts).values({ userId, email: input.email, passwordHash: input.passwordHash });
+      const created = await tx.select().from(users).where(eq(users.id, userId)).limit(1);
+      if (!created[0]) throw new Error("Account was not created.");
+      return created[0];
+    });
+  } catch (error: unknown) {
+    if (typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ER_DUP_ENTRY") {
+      throw new LocalAccountEmailTakenError();
+    }
+    throw error;
+  }
+}
+
+export async function getLocalAccountCredential(email: string): Promise<LocalAccountCredential | undefined> {
+  const db = await getDb();
+  if (!db) throw new Error("Account storage is unavailable.");
+  const rows = await db
+    .select({ user: users, passwordHash: sentixLocalAccounts.passwordHash })
+    .from(sentixLocalAccounts)
+    .innerJoin(users, eq(sentixLocalAccounts.userId, users.id))
+    .where(eq(sentixLocalAccounts.email, email))
+    .limit(1);
+  return rows[0];
 }
 
 export type StoredReview = { id: string; date?: string; text: string; author?: string; source?: string; rating?: number | null; category: string; label: "Positive" | "Neutral" | "Negative"; compound: number; confidence: number; vaderCompound: number; transformerLabel?: "Positive" | "Neutral" | "Negative" | null; transformerConfidence: number | null; transformerUsed: boolean; actionTag: string; timestamp: number };

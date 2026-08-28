@@ -82,7 +82,11 @@ html:not(.dark) {
 }
 
 @layer utilities {
-  .app-dashboard > main > section:first-child { display: none; }
+  .app-dashboard > main > section:first-child { display: block; position: relative; overflow: hidden; border-color: #323846; background: linear-gradient(120deg, rgba(11, 114, 231, 0.16), rgba(29, 35, 47, 0.97) 42%, rgba(78, 20, 119, 0.18)); box-shadow: 0 18px 50px rgba(6, 9, 16, 0.24); }
+  .app-dashboard > main > section:first-child::after { content: "ANALYSIS CONTROL CENTER"; position: absolute; right: 1.75rem; top: 1.15rem; color: rgba(142, 197, 255, 0.52); font-size: 0.625rem; font-weight: 800; letter-spacing: 0.18em; pointer-events: none; }
+  .app-dashboard > header { border-color: #323846 !important; background: rgba(22, 27, 38, 0.92) !important; box-shadow: 0 1px 0 rgba(245, 247, 250, 0.03); }
+  .app-dashboard > header [class*="from-indigo"] { background: #0B72E7 !important; box-shadow: 0 10px 24px rgba(11, 114, 231, 0.22); }
+  .app-dashboard > header [class*="text-indigo"] { color: #8ec5ff !important; }
   .app-nav-link { display: flex; align-items: center; gap: 0.75rem; border-radius: 0.75rem; padding: 0.7rem 0.75rem; color: #8B93A3; font-size: 0.875rem; font-weight: 700; transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out); }
   .app-nav-link:hover { background: #1D232F; color: #F5F7FA; }
   .app-nav-link-active { background: rgba(11, 114, 231, 0.16); color: #8ec5ff; }
@@ -109,6 +113,9 @@ html:not(.dark) {
   html:not(.dark) body { background-image: radial-gradient(circle at 15% -5%, rgba(78, 20, 119, 0.10), transparent 32%), radial-gradient(circle at 90% 12%, rgba(11, 114, 231, 0.09), transparent 23%); }
   html:not(.dark) .fine-grid { color: #182132; background-color: #F7F9FC; background-image: linear-gradient(rgba(11, 114, 231, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(11, 114, 231, 0.06) 1px, transparent 1px); }
   html:not(.dark) .fine-grid .glass-panel { background: linear-gradient(145deg, #FFFFFF, #F4F7FA); box-shadow: 0 14px 40px rgba(22, 27, 38, 0.08); }
+  html:not(.dark) .app-dashboard > main > section:first-child { background: linear-gradient(120deg, rgba(11, 114, 231, 0.10), #FFFFFF 46%, rgba(78, 20, 119, 0.08)); box-shadow: 0 14px 40px rgba(22, 27, 38, 0.08); }
+  html:not(.dark) .app-dashboard > main > section:first-child::after { color: rgba(3, 96, 185, 0.48); }
+  html:not(.dark) .app-dashboard > header { background: rgba(255, 255, 255, 0.92) !important; border-color: #CBD3DD !important; }
   html:not(.dark) .fine-grid [class*="bg-slate-"], html:not(.dark) .fine-grid [class*="bg-[#"] { background-color: rgba(255, 255, 255, 0.92) !important; }
   html:not(.dark) .fine-grid [class*="text-slate-1"], html:not(.dark) .fine-grid [class*="text-slate-2"], html:not(.dark) .fine-grid [class*="text-slate-3"] { color: #182132; }
   html:not(.dark) .fine-grid [class*="text-slate-4"], html:not(.dark) .fine-grid [class*="text-slate-5"] { color: #5F6878; }

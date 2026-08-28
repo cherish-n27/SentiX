@@ -25,6 +25,21 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
+/**
+ * First-party email/password credentials. Passwords are never stored in the
+ * users table or returned to the client; this table contains a salted hash only.
+ */
+export const sentixLocalAccounts = mysqlTable("sentixLocalAccounts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, table => [index("sentix_local_account_user_idx").on(table.userId)]);
+
+export type SentiXLocalAccount = typeof sentixLocalAccounts.$inferSelect;
+
 export const sentixWorkspaces = mysqlTable("sentixWorkspaces", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
